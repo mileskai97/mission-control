@@ -34,9 +34,10 @@ export default function App() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-deep)" }}>
-      {/* Sidebar */}
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "var(--bg-deep)" }}>
+      {/* Sidebar - desktop only */}
       <nav
+        className="desktop-sidebar"
         style={{
           width: 64,
           background: "var(--bg-primary)",
@@ -81,7 +82,7 @@ export default function App() {
       </nav>
 
       {/* Main */}
-      <div style={{ marginLeft: 64, flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="main-content" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Header */}
         <header
           style={{
@@ -91,30 +92,32 @@ export default function App() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "0 24px",
+            padding: "0 16px",
             position: "sticky",
             top: 0,
             zIndex: 40,
+            gap: 8,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <h1 style={{ fontSize: 18, margin: 0, color: "var(--text-primary)", letterSpacing: "0.08em" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+            <h1 style={{ fontSize: "clamp(13px, 3.5vw, 18px)", margin: 0, color: "var(--text-primary)", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>
               MISSION CONTROL
             </h1>
             <span
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 6,
+                gap: 4,
                 fontSize: 10,
                 fontFamily: "var(--font-mono)",
                 fontWeight: 500,
                 color: "var(--success)",
                 background: "rgba(34,197,94,0.1)",
-                padding: "3px 10px",
+                padding: "3px 8px",
                 borderRadius: 20,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
+                flexShrink: 0,
               }}
             >
               <span
@@ -130,16 +133,16 @@ export default function App() {
               Live
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <CurrentTime />
-            <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+            <span className="hide-mobile" style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
               GlowStudio
             </span>
           </div>
         </header>
 
         {/* Content */}
-        <main style={{ flex: 1, padding: 24, overflowY: "auto" }}>
+        <main style={{ flex: 1, padding: "16px", overflowY: "auto", paddingBottom: 80 }}>
           {selectedTaskId ? (
             <div>
               <button
@@ -169,6 +172,65 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Bottom tab bar - mobile only */}
+      <nav
+        className="mobile-tabbar"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 64,
+          background: "var(--bg-primary)",
+          borderTop: "1px solid var(--border)",
+          display: "none",
+          justifyContent: "space-around",
+          alignItems: "center",
+          zIndex: 50,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
+        {navItems.map((item) => (
+          <button
+            key={item.key}
+            onClick={() => { setActiveView(item.key); setSelectedTaskId(null); }}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 2,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "8px 0",
+              color: activeView === item.key ? "var(--accent-light)" : "var(--text-muted)",
+              transition: "color 0.2s",
+            }}
+          >
+            <span style={{ fontSize: 20 }}>{item.icon}</span>
+            <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              {item.label}
+            </span>
+          </button>
+        ))}
+      </nav>
+
+      <style>{`
+        @media (min-width: 768px) {
+          .main-content { margin-left: 64px; }
+          .main-content main { padding: 24px; }
+          .desktop-sidebar { display: flex !important; }
+          .mobile-tabbar { display: none !important; }
+        }
+        @media (max-width: 767px) {
+          .desktop-sidebar { display: none !important; }
+          .mobile-tabbar { display: flex !important; }
+          .hide-mobile { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }

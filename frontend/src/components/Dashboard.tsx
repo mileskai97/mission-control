@@ -49,7 +49,7 @@ export function Dashboard({ onSelectTask: _onSelectTask }: { onSelectTask: (id: 
   return (
     <div className="animate-fadeInUp">
       {/* Stat Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 32 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 32 }}>
         {stats.map((s, i) => (
           <div
             key={s.label}
@@ -102,7 +102,7 @@ export function Dashboard({ onSelectTask: _onSelectTask }: { onSelectTask: (id: 
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
         {/* Recent Activity */}
         <div>
           <h2 style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "var(--font-mono)", fontWeight: 400 }}>

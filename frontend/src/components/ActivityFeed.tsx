@@ -39,7 +39,7 @@ export function ActivityFeed() {
   }
 
   return (
-    <div style={{ maxWidth: 640, margin: "0 auto" }}>
+    <div style={{ maxWidth: 640, margin: "0 auto", width: "100%" }}>
       <h2 style={{ fontSize: 24, color: "var(--text-primary)", marginBottom: 24 }}>Activity Feed</h2>
       <div style={{ position: "relative", paddingLeft: 28 }}>
         {/* Vertical line */}

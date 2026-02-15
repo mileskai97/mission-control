@@ -29,11 +29,20 @@ export function TaskBoard({ onSelectTask }: { onSelectTask: (id: string) => void
   return (
     <div>
       <h2 style={{ fontSize: 24, color: "var(--text-primary)", marginBottom: 20 }}>Task Board</h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 16,
+          overflowX: "auto",
+          WebkitOverflowScrolling: "touch",
+          scrollSnapType: "x mandatory",
+          paddingBottom: 8,
+        }}
+      >
         {columns.map((col) => {
           const colTasks = tasks.filter((t) => t.status === col.key);
           return (
-            <div key={col.key} style={{ minHeight: 300 }}>
+            <div key={col.key} style={{ minHeight: 300, minWidth: 220, flex: "1 0 220px", scrollSnapAlign: "start" }}>
               {/* Column header with left border */}
               <div
                 style={{
@@ -82,7 +91,7 @@ export function TaskBoard({ onSelectTask }: { onSelectTask: (id: string) => void
                     >
                       {task.priority}
                     </span>
-                    <p style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 600, margin: 0, lineHeight: 1.4 }}>
+                    <p style={{ fontSize: 13, color: "var(--text-primary)", fontWeight: 600, margin: 0, lineHeight: 1.4, overflowWrap: "break-word", wordBreak: "break-word" }}>
                       {task.title}
                     </p>
                     {task.tags && task.tags.length > 0 && (
