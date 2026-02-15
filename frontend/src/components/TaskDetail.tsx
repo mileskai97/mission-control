@@ -14,12 +14,19 @@ function timeAgo(ts: number): string {
 }
 
 const statusColors: Record<string, string> = {
-  inbox: "#a8a29e",
+  inbox: "#a89f8c",
   assigned: "#3b82f6",
   in_progress: "#f59e0b",
-  review: "#8b5cf6",
+  review: "#a78bfa",
   done: "#22c55e",
   blocked: "#ef4444",
+};
+
+const priorityColors: Record<string, string> = {
+  P0: "#ef4444",
+  P1: "#f59e0b",
+  P2: "#3b82f6",
+  P3: "#a89f8c",
 };
 
 export function TaskDetail({ taskId }: { taskId: string }) {
@@ -32,7 +39,7 @@ export function TaskDetail({ taskId }: { taskId: string }) {
   const [selectedAgent, setSelectedAgent] = useState<string>("");
 
   if (!task || !messages || !agents) {
-    return <div className="text-[#a8a29e] text-center py-8">Loading task...</div>;
+    return <div style={{ color: "var(--text-muted)", textAlign: "center", padding: 40 }}>Loading task...</div>;
   }
 
   const agentMap = new Map(agents.map((a) => [a._id, a]));
@@ -47,36 +54,68 @@ export function TaskDetail({ taskId }: { taskId: string }) {
     setComment("");
   };
 
+  const sColor = statusColors[task.status] || "var(--accent)";
+  const pColor = priorityColors[task.priority] || "var(--text-muted)";
+
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Task Header */}
-      <div className="bg-[#242424] border border-[#3d3d3d] rounded-xl p-6 mb-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="text-xs font-bold px-2 py-1 rounded"
-                style={{
-                  color: statusColors[task.status],
-                  backgroundColor: `${statusColors[task.status]}20`,
-                }}
-              >
-                {task.status.replace("_", " ").toUpperCase()}
-              </span>
-              <span className="text-xs font-bold text-[#d97706]">{task.priority}</span>
-            </div>
-            <h2 className="text-xl font-bold text-[#e8e6e3]">{task.title}</h2>
-          </div>
+    <div className="animate-fadeInUp" style={{ maxWidth: 720, margin: "0 auto" }}>
+      {/* Task Header — sticky */}
+      <div
+        className="glass"
+        style={{
+          borderRadius: 12,
+          padding: 24,
+          marginBottom: 24,
+          position: "sticky",
+          top: 72,
+          zIndex: 10,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+          <span
+            className="mono"
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              color: sColor,
+              background: `${sColor}18`,
+              padding: "3px 10px",
+              borderRadius: 4,
+              textTransform: "uppercase",
+            }}
+          >
+            {task.status.replace("_", " ")}
+          </span>
+          <span
+            className="mono"
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: pColor,
+              background: `${pColor}18`,
+              padding: "3px 10px",
+              borderRadius: 4,
+            }}
+          >
+            {task.priority}
+          </span>
         </div>
-        <p className="text-sm text-[#a8a29e] leading-relaxed">{task.description}</p>
+        <h2 style={{ fontSize: 22, color: "var(--text-primary)", margin: 0, lineHeight: 1.3 }}>{task.title}</h2>
+        <p style={{ fontSize: 15, color: "var(--text-secondary)", lineHeight: 1.7, marginTop: 12 }}>
+          {task.description}
+        </p>
 
         {task.assigneeIds.length > 0 && (
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#3d3d3d]">
-            <span className="text-xs text-[#a8a29e]">Assigned to:</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Assigned to</span>
             {task.assigneeIds.map((id) => {
               const agent = agentMap.get(id);
               return agent ? (
-                <span key={id} className="text-xs bg-[#2d2d2d] px-2 py-1 rounded-full text-[#e8e6e3]">
+                <span
+                  key={id}
+                  className="glass-subtle"
+                  style={{ fontSize: 12, padding: "4px 10px", borderRadius: 20, color: "var(--text-primary)" }}
+                >
                   {agent.avatar} {agent.name}
                 </span>
               ) : null;
@@ -85,9 +124,9 @@ export function TaskDetail({ taskId }: { taskId: string }) {
         )}
 
         {task.tags && task.tags.length > 0 && (
-          <div className="flex gap-1 mt-3">
+          <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
             {task.tags.map((tag) => (
-              <span key={tag} className="text-xs text-[#a8a29e] bg-[#2d2d2d] px-2 py-0.5 rounded">
+              <span key={tag} style={{ fontSize: 11, color: "var(--text-muted)", background: "var(--bg-tertiary)", padding: "2px 8px", borderRadius: 4 }}>
                 #{tag}
               </span>
             ))}
@@ -95,29 +134,56 @@ export function TaskDetail({ taskId }: { taskId: string }) {
         )}
       </div>
 
-      {/* Comment Thread */}
-      <div className="bg-[#242424] border border-[#3d3d3d] rounded-xl p-6">
-        <h3 className="text-sm font-semibold text-[#e8e6e3] mb-4">
+      {/* Comments */}
+      <div className="glass" style={{ borderRadius: 12, padding: 24 }}>
+        <h3 style={{ fontSize: 14, color: "var(--text-muted)", margin: "0 0 20px", fontFamily: "var(--font-mono)", fontWeight: 400, textTransform: "uppercase", letterSpacing: "0.1em" }}>
           Comments ({messages.length})
         </h3>
 
         {messages.length === 0 ? (
-          <p className="text-sm text-[#a8a29e] py-4">No comments yet</p>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", padding: "16px 0" }}>No comments yet</p>
         ) : (
-          <div className="space-y-4 mb-6">
-            {messages.map((msg) => {
+          <div style={{ position: "relative", paddingLeft: 32, marginBottom: 24 }}>
+            {/* Connecting line */}
+            <div
+              style={{
+                position: "absolute",
+                left: 14,
+                top: 20,
+                bottom: 20,
+                width: 2,
+                background: "var(--border)",
+              }}
+            />
+            {messages.map((msg, i) => {
               const author = agentMap.get(msg.fromAgentId);
               return (
-                <div key={msg._id} className="flex gap-3">
-                  <span className="text-lg">{author?.avatar || "👤"}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-[#e8e6e3]">
+                <div
+                  key={msg._id}
+                  className={`animate-fadeInLeft stagger-${Math.min(i + 1, 8)}`}
+                  style={{ position: "relative", paddingBottom: 20 }}
+                >
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: -26,
+                      top: 2,
+                      fontSize: 20,
+                      zIndex: 1,
+                    }}
+                  >
+                    {author?.avatar || "👤"}
+                  </span>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
                         {author?.name || "Unknown"}
                       </span>
-                      <span className="text-xs text-[#a8a29e]">{timeAgo(msg.createdAt)}</span>
+                      <span className="mono" style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        {timeAgo(msg.createdAt)}
+                      </span>
                     </div>
-                    <p className="text-sm text-[#a8a29e] mt-1 whitespace-pre-wrap">
+                    <p style={{ fontSize: 14, color: "var(--text-secondary)", margin: "6px 0 0", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
                       {msg.content}
                     </p>
                   </div>
@@ -127,29 +193,51 @@ export function TaskDetail({ taskId }: { taskId: string }) {
           </div>
         )}
 
-        {/* Post Comment */}
-        <div className="border-t border-[#3d3d3d] pt-4">
-          <div className="flex gap-2 mb-2">
-            <select
-              value={selectedAgent}
-              onChange={(e) => setSelectedAgent(e.target.value)}
-              className="bg-[#2d2d2d] border border-[#3d3d3d] rounded-lg px-3 py-2 text-sm text-[#e8e6e3] outline-none"
-            >
-              <option value="">Post as...</option>
-              {agents.map((a) => (
-                <option key={a._id} value={a._id}>
-                  {a.avatar} {a.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2">
+        {/* Comment input */}
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+          <select
+            value={selectedAgent}
+            onChange={(e) => setSelectedAgent(e.target.value)}
+            style={{
+              background: "var(--bg-tertiary)",
+              border: "1px solid var(--border)",
+              borderRadius: 8,
+              padding: "8px 12px",
+              fontSize: 13,
+              color: "var(--text-primary)",
+              outline: "none",
+              marginBottom: 8,
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            <option value="">Post as...</option>
+            {agents.map((a) => (
+              <option key={a._id} value={a._id}>
+                {a.avatar} {a.name}
+              </option>
+            ))}
+          </select>
+          <div style={{ display: "flex", gap: 8 }}>
             <textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Write a comment... (use @name to mention)"
-              className="flex-1 bg-[#2d2d2d] border border-[#3d3d3d] rounded-lg px-3 py-2 text-sm text-[#e8e6e3] placeholder-[#a8a29e]/40 outline-none resize-none"
+              placeholder="Write a comment..."
               rows={2}
+              style={{
+                flex: 1,
+                background: "var(--bg-tertiary)",
+                border: "1px solid var(--border)",
+                borderRadius: 8,
+                padding: "10px 14px",
+                fontSize: 13,
+                color: "var(--text-primary)",
+                outline: "none",
+                resize: "none",
+                fontFamily: "var(--font-body)",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--accent)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--border)"; }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && e.metaKey) handlePostComment();
               }}
@@ -157,7 +245,20 @@ export function TaskDetail({ taskId }: { taskId: string }) {
             <button
               onClick={handlePostComment}
               disabled={!comment.trim() || !selectedAgent}
-              className="px-4 py-2 bg-[#d97706] text-white text-sm font-medium rounded-lg hover:bg-[#b45309] disabled:opacity-30 disabled:cursor-not-allowed transition-colors self-end"
+              style={{
+                padding: "0 20px",
+                background: "var(--accent)",
+                color: "#fff",
+                fontSize: 13,
+                fontWeight: 600,
+                border: "none",
+                borderRadius: 8,
+                cursor: comment.trim() && selectedAgent ? "pointer" : "not-allowed",
+                opacity: comment.trim() && selectedAgent ? 1 : 0.3,
+                transition: "all 0.2s",
+                alignSelf: "flex-end",
+                fontFamily: "var(--font-body)",
+              }}
             >
               Post
             </button>

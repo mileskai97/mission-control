@@ -1,12 +1,13 @@
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
-const typeIcons: Record<string, string> = {
-  deliverable: "📦",
-  research: "🔬",
-  protocol: "📋",
-  report: "📊",
-  review: "🔍",
+const typeConfig: Record<string, { icon: string; color: string }> = {
+  deliverable: { icon: "📦", color: "#f59e0b" },
+  research: { icon: "🔬", color: "#3b82f6" },
+  protocol: { icon: "📋", color: "#a78bfa" },
+  report: { icon: "📊", color: "#22c55e" },
+  review: { icon: "🔍", color: "#ef4444" },
 };
 
 function formatDate(ts: number): string {
@@ -21,55 +22,94 @@ function formatDate(ts: number): string {
 export function DocumentPanel() {
   const documents = useQuery(api.documents.list);
   const agents = useQuery(api.agents.list);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (!documents || !agents) {
-    return <div className="text-[#a8a29e] text-center py-8">Loading documents...</div>;
+    return <div style={{ color: "var(--text-muted)", textAlign: "center", padding: 40 }}>Loading documents...</div>;
   }
 
   const agentMap = new Map(agents.map((a) => [a._id, a]));
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-lg font-semibold text-[#e8e6e3] mb-4">Documents</h2>
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <h2 style={{ fontSize: 24, color: "var(--text-primary)", marginBottom: 20 }}>Documents</h2>
 
       {documents.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-[#a8a29e] text-lg">No documents yet</p>
-          <p className="text-[#a8a29e]/60 text-sm mt-2">
+        <div style={{ textAlign: "center", padding: 60 }}>
+          <p style={{ color: "var(--text-secondary)", fontSize: 18 }}>No documents yet</p>
+          <p style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 8 }}>
             Documents will appear here as agents create deliverables
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {documents.map((doc) => {
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {documents.map((doc, i) => {
             const author = agentMap.get(doc.createdBy);
+            const cfg = typeConfig[doc.type] || { icon: "📄", color: "var(--accent)" };
+            const isHovered = hoveredId === doc._id;
+
             return (
               <div
                 key={doc._id}
-                className="bg-[#242424] border border-[#3d3d3d] rounded-lg p-4 hover:border-[#d97706]/30 transition-colors"
+                className={`glass card-hover animate-fadeInUp stagger-${Math.min(i + 1, 8)}`}
+                style={{ borderRadius: 10, padding: 16, cursor: "default" }}
+                onMouseEnter={() => setHoveredId(doc._id)}
+                onMouseLeave={() => setHoveredId(null)}
               >
-                <div className="flex items-start gap-3">
-                  <span className="text-xl">{typeIcons[doc.type] || "📄"}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-medium text-[#e8e6e3]">{doc.title}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-xs text-[#a8a29e] bg-[#2d2d2d] px-2 py-0.5 rounded">
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  {/* Type icon with colored circle */}
+                  <div
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      background: `${cfg.color}18`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 18,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {cfg.icon}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", margin: 0 }}>{doc.title}</h3>
+                      <span className="mono" style={{ fontSize: 10, color: cfg.color, background: `${cfg.color}18`, padding: "1px 6px", borderRadius: 4 }}>
                         {doc.type}
                       </span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
                       {author && (
-                        <span className="text-xs text-[#a8a29e]">
-                          by {author.avatar} {author.name}
+                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                          {author.avatar} {author.name}
                         </span>
                       )}
-                      <span className="text-xs text-[#a8a29e]/60 ml-auto">
+                      <span className="mono" style={{ fontSize: 11, color: "var(--text-muted)", marginLeft: "auto" }}>
                         {formatDate(doc.createdAt)}
                       </span>
                     </div>
-                    <p className="text-xs text-[#a8a29e] mt-2 line-clamp-2">
-                      {doc.content.substring(0, 200)}
-                    </p>
                   </div>
                 </div>
+                {/* Preview on hover */}
+                {isHovered && (
+                  <div
+                    className="animate-fadeInUp"
+                    style={{
+                      marginTop: 12,
+                      padding: 12,
+                      background: "var(--bg-tertiary)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.6,
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {doc.content.split("\n").slice(0, 3).join("\n").substring(0, 300)}
+                  </div>
+                )}
               </div>
             );
           })}
